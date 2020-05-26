@@ -1,0 +1,52 @@
+apiVersion: v1
+data:
+  ENV_VAR_1: fake
+  ENV_VAR_2: faker
+kind: ConfigMap
+metadata:
+  name: example-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: example
+    component: nginx
+  name: example-nginx
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: example
+    component: nginx
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app-direct
+    component: app-server
+  name: app-direct-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-direct
+      component: app-server
+  template:
+    metadata:
+      labels:
+        app: app-direct
+        component: app-server
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: example-config
+        image: cremerfc/appdirect:latest
+        name: appdirect
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
