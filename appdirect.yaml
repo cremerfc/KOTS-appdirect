@@ -25,27 +25,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: flask-app
-    component: flask-server
-  name: flask-app-deployment
+    app: app-direct
+    component: app-server
+  name: app-direct-deployment
 spec:
-  replicas: 4
+  replicas: 1
   selector:
     matchLabels:
-      app: flask-app
-      component: flask-server
+      app: app-direct
+      component: app-server
   template:
     metadata:
       labels:
-        app: flask-app
-        component: flask-server
+        app: app-direct
+        component: app-server
     spec:
       containers:
       - envFrom:
         - configMapRef:
             name: example-config
-        image: cremerfc/flask-app:131
-        name: flask-app
+        image: cremerfc/appdirect:latest
+        name: appdirect
         resources:
           limits:
             cpu: 500m
