@@ -1,10 +1,9 @@
 apiVersion: v1
 data:
-  ENV_VAR_1: fake
-  ENV_VAR_2: faker
+  PAGE_MESSAGE: '{{ repl ConfigOption "page-message-input"}}'
 kind: ConfigMap
 metadata:
-  name: example-config
+  name: appdirect-config-map
 ---
 apiVersion: v1
 kind: Service
@@ -29,7 +28,7 @@ metadata:
     component: app-server
   name: app-direct-deployment
 spec:
-  replicas: 1
+  replicas: 4
   selector:
     matchLabels:
       app: app-direct
@@ -41,12 +40,24 @@ spec:
         component: app-server
     spec:
       containers:
-      - envFrom:
-        - configMapRef:
-            name: example-config
+      - env:
+        - name: PAGE_MESSAGE
+          valueFrom:
+            configMapKeyRef:
+              key: PAGE_MESSAGE
+              name: appdirect-config-map
         image: cremerfc/appdirect:latest
         name: appdirect
-        resources:
-          limits:
-            cpu: 500m
-            memory: 256Mi
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: example-nginx
+          servicePort: 80
+        path: /
