@@ -8,17 +8,15 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: example
-    component: nginx
-  name: example-nginx
+  name: app-direct-service
 spec:
   ports:
   - port: 80
+    protocol: TCP
+    targetPort: 5000
   selector:
-    app: example
-    component: nginx
-  type: ClusterIP
+    app: app-direct
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,6 +46,8 @@ spec:
               name: appdirect-config-map
         image: cremerfc/appdirect:latest
         name: appdirect
+        ports:
+        - containerPort: 5000
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -58,6 +58,6 @@ spec:
   - http:
       paths:
       - backend:
-          serviceName: example-nginx
+          serviceName: app-direct-service
           servicePort: 80
         path: /
